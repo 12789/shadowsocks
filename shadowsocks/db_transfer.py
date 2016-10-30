@@ -49,7 +49,7 @@ class DbTransfer(object):
                 dt_transfer[id] = [curr_transfer[id][0], curr_transfer[id][1]]
 
         self.last_get_transfer = curr_transfer
-        query_head = 'UPDATE {}'.fromat(TBL_USER)
+        query_head = 'UPDATE {}'.format(TBL_USER)
         query_sub_when = ''
         query_sub_when2 = ''
         query_sub_in = None
