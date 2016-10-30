@@ -36,6 +36,7 @@ import asyncmgr
 import Config
 from socket import *
 
+
 class ServerPool(object):
 
     instance = None
@@ -50,7 +51,8 @@ class ServerPool(object):
         #self.udp_servers_pool = {}
 
         self.loop = eventloop.EventLoop()
-        thread.start_new_thread(ServerPool._loop, (self.loop, self.dns_resolver, self.mgr))
+        thread.start_new_thread(
+            ServerPool._loop, (self.loop, self.dns_resolver, self.mgr))
 
     @staticmethod
     def get_instance():
@@ -81,7 +83,10 @@ class ServerPool(object):
         logging.info("start server at %d" % port)
         try:
             udpsock = socket(AF_INET, SOCK_DGRAM)
-            udpsock.sendto('%s:%s:%s:1' % (Config.MANAGE_PASS, port, password), (Config.MANAGE_BIND_IP, Config.MANAGE_PORT))
+            udpsock.sendto(
+                '%s:%s:%s:1' % (Config.MANAGE_PASS, port, password),
+                (Config.MANAGE_BIND_IP, Config.MANAGE_PORT)
+            )
             udpsock.close()
         except Exception, e:
             logging.warn(e)
@@ -93,20 +98,26 @@ class ServerPool(object):
 
         if 'server' in self.config:
             if port in self.tcp_servers_pool:
-                logging.info("server already at %s:%d" % (self.config['server'], port))
+                logging.info("server already at %s:%d" %
+                             (self.config['server'], port))
                 return 'this port server is already running'
             else:
                 a_config = self.config.copy()
                 a_config['server_port'] = port
                 a_config['password'] = password
                 try:
-                    logging.info("starting server at %s:%d" % (a_config['server'], port))
-                    tcp_server = tcprelay.TCPRelay(a_config, self.dns_resolver, False)
+                    logging.info("starting server at %s:%d" %
+                                 (a_config['server'], port))
+                    tcp_server = tcprelay.TCPRelay(
+                        a_config,
+                        self.dns_resolver,
+                        False
+                    )
                     tcp_server.add_to_loop(self.loop)
                     self.tcp_servers_pool[port] = tcp_server
-                    #udp_server = udprelay.UDPRelay(a_config, self.dns_resolver, False)
-                    #udp_server.add_to_loop(self.loop)
-                    #self.udp_servers_pool.update({port: udp_server})
+                    # udp_server = udprelay.UDPRelay(a_config, self.dns_resolver, False)
+                    # udp_server.add_to_loop(self.loop)
+                    # self.udp_servers_pool.update({port: udp_server})
                 except Exception, e:
                     logging.warn(e)
         return True
@@ -116,7 +127,10 @@ class ServerPool(object):
         logging.info("del server at %d" % port)
         try:
             udpsock = socket(AF_INET, SOCK_DGRAM)
-            udpsock.sendto('%s:%s:0:0' % (Config.MANAGE_PASS, port), (Config.MANAGE_BIND_IP, Config.MANAGE_PORT))
+            udpsock.sendto('%s:%s:0:0' % (
+                Config.MANAGE_PASS, port),
+                (Config.MANAGE_BIND_IP, Config.MANAGE_PORT)
+            )
             udpsock.close()
         except Exception, e:
             logging.warn(e)
@@ -126,9 +140,11 @@ class ServerPool(object):
         port = int(port)
 
         if port not in self.tcp_servers_pool:
-            logging.info("stopped server at %s:%d already stop" % (self.config['server'], port))
+            logging.info("stopped server at %s:%d already stop" %
+                         (self.config['server'], port))
         else:
-            logging.info("stopped server at %s:%d" % (self.config['server'], port))
+            logging.info("stopped server at %s:%d" %
+                         (self.config['server'], port))
             try:
                 server = self.tcp_servers_pool[port]
                 del self.tcp_servers_pool[port]
@@ -139,8 +155,11 @@ class ServerPool(object):
 
     def get_servers_transfer(self):
         ret = {}
-        #this is different thread but safe
+        # this is different thread but safe
         servers = self.tcp_servers_pool.copy()
         for port in servers.keys():
-            ret[port] = [servers[port].server_transfer_ul, servers[port].server_transfer_dl]
+            ret[port] = [
+                servers[port].server_transfer_ul,
+                servers[port].server_transfer_dl
+            ]
         return ret
